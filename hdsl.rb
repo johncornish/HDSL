@@ -65,19 +65,3 @@ class HDSL
 			tagend tag
 		end
 end
-
-test = HDSL.new do
-	html do
-		head do
-			tag_build 'script', 'type="text/javascript"', "'window.onload = alert('1337 h4x');"
-			stylesheet 'css/main.css'
-		end
-		body do
-			title "HDSL generated page"
-			h2 "HDSL generated page"
-			par "Some regular old memes."
-		end
-	end
-end
-
-puts test.result
