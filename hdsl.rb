@@ -12,20 +12,45 @@ class HDSL
 		ensure
 			file.close unless file.nil?
 	end
-	
+
+#BEGIN special tags
+	#p is shorthand for "puts", so this must be used instead
+	def par(*args, &block)
+		tagstart 'p'
+		do_content *args, &block
+		tagend 'p'
+	end
+
+	def stylesheet(href)
+		@result ||= ''
+		@result << "<link rel=\"stylesheet\" type=\"text/css\" href=\"#{href}\">"
+	end
+#END special tags
+
 	private
-		def do_content(*args, &block)
+		def tag_build *args, &block
+			tagname, *attrs, content = *args
+			if !content
+				content = ''
+			end
+
+			tagstart tagname + ' ' + attrs.join(' ')
+			do_content content, &block
+			tagend tagname
+		end
+
+		def tagstart tagname
+			@result ||= ''
+			@result << "<#{tagname}>"
+		end
+
+		def do_content *args, &block
 			content = args.first
 			if block_given?
 				instance_eval(&block)
 			else
 				@result << content unless !content
 			end
-		end
-
-		def tagstart tagname
-			@result ||= ''
-			@result << "<#{tagname}>"
 		end
 
 		def tagend tagname
@@ -39,16 +64,20 @@ class HDSL
 			do_content *args, &block
 			tagend tag
 		end
-
-		def script(*args, &block)
-			tagstart 'script type="text/javascript"'
-			do_content *args, &block
-			tagend 'script'
-		end
-
-		def par(*args, &block)
-			tagstart 'p'
-			do_content *args, &block
-			tagend 'p'
-		end
 end
+
+test = HDSL.new do
+	html do
+		head do
+			tag_build 'script', 'type="text/javascript"', "'window.onload = alert('1337 h4x');"
+			stylesheet 'css/main.css'
+		end
+		body do
+			title "HDSL generated page"
+			h2 "HDSL generated page"
+			par "Some regular old memes."
+		end
+	end
+end
+
+puts test.result
