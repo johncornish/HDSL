@@ -1,7 +1,10 @@
 class HDSL
   attr_reader :result
-  def initialize(&block)
+  def initialize(*args, &block)
     instance_eval(&block)
+    if args.length == 1
+      self.save args.first
+    end
   end
 
   def save(filename)
