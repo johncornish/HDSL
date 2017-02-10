@@ -28,11 +28,14 @@ class HDSL
 #END special tags
 
   private
-    def tag_build *args, &block
-      tagname, *attrs, content = *args
-      if !content
-        content = ''
+    def with_attr *args, &block
+      if block_given?
+        tagname, *attrs = *args
+      else
+        tagname, *attrs, content = *args
       end
+
+      content = '' if !content
 
       tagstart tagname + ' ' + attrs.join(' ')
       do_content content, &block
@@ -54,7 +57,7 @@ class HDSL
     end
 
     def tagend tagname
-      @result << "</#{tagname}>\n"
+      @result << "</#{tagname}>"
     end
 
     def method_missing(name, *args, &block)
